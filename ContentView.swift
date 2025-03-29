@@ -125,11 +125,13 @@ struct ContentView: View {
     }
     
     private func addOperation(_ operation: String) {
-        if let lastChar = display.last, "+-x÷".contains(lastChar) {
+        let formattedDisplay = display.replacingOccurrences(of: " ", with: "")
+        if let lastChar = formattedDisplay.last, "+-x÷".contains(lastChar) {
             display.removeLast()
-            display += "\(operation)"
+            display.removeLast()
+            display += "\(operation) "
         } else {
-            display += "\(operation)"
+            display += " \(operation) "
         }
         lastOperator = operation
         justCalculated = false
@@ -138,7 +140,6 @@ struct ContentView: View {
     private func calculateResult() {
         // Check if the last character is an operator
         if let lastChar = display.last, "+-x÷".contains(lastChar) {
-            display = "Error"
             return
         }
         
@@ -195,6 +196,7 @@ struct ContentView: View {
     
     private func memoryAdd() {
         let formattedDisplay = display.replacingOccurrences(of: ",", with: "")
+        
         if let value = Double(formattedDisplay) {
             memory += value
             isMemoryStored = true  // Set state to true when something is stored in memory
@@ -223,7 +225,7 @@ struct ContentView: View {
     
     private func memoryRecall() {
         if lastOperator != nil {
-            display += " \(memory)"
+            display += "\(memory)"
         } else {
             display = String(memory)
         }
