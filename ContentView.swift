@@ -27,11 +27,23 @@ struct ContentView: View {
             if showHistory {
                 ScrollView {
                     VStack(alignment: .leading) {
-                        Text("History...")
-                        .font(.title)
+                        HStack {
+                            Text("History...                ")
+                                .font(.title)
+                           
+                            Button(action: {
+                                history.removeAll()
+                            }) {
+                                Text("Clear History")
+                                    .font(.body)
+                                    .foregroundColor(.blue)
+                            }
+                           
+                        }
                         ForEach(history, id: \.self) { entry in
                             Text(entry)
                                 .padding()
+                                .font(.body)
                                 .background(Color.gray.opacity(0.1))
                                 .cornerRadius(5)
                         }
@@ -44,7 +56,7 @@ struct ContentView: View {
                 Text(display)
                     .font(.largeTitle)
                     .padding()
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .frame(maxWidth: 350, alignment: .trailing)
                     .background(Color.gray.opacity(0.2))
                     .cornerRadius(10)
                 
@@ -56,16 +68,16 @@ struct ContentView: View {
                         MemoryButton(label: "MR", isEnabled: isMemoryStored, action: memoryRecall)
                     }
                     HStack {
-                        CalculatorButton(label: "AC", action: clearDisplay)
-                        CalculatorButton(label: "+/-", action: toggleSign)
-                        CalculatorButton(label: "%", action: calculatePercentage)
+                        CalculatorButton(label: "AC", action: clearDisplay, backgroundColor: Color.gray.opacity(0.3), fontSize: .title)
+                        CalculatorButton(label: "+/-", action: toggleSign,  backgroundColor: Color.gray.opacity(0.3), fontSize: .title)
+                        CalculatorButton(label: "%", action: calculatePercentage,  backgroundColor: Color.gray.opacity(0.3), fontSize: .title)
                         CalculatorButton(label: "÷", action: { addOperation("÷") }, backgroundColor: .orange)
                     }
                     HStack {
                         CalculatorButton(label: "7", action: { addDigit("7") })
                         CalculatorButton(label: "8", action: { addDigit("8") })
                         CalculatorButton(label: "9", action: { addDigit("9") })
-                        CalculatorButton(label: "*", action: { addOperation("*") }, backgroundColor: .orange)
+                        CalculatorButton(label: "x", action: { addOperation("x") }, backgroundColor: .orange)
                     }
                     HStack {
                         CalculatorButton(label: "4", action: { addDigit("4") })
@@ -113,7 +125,7 @@ struct ContentView: View {
     }
     
     private func addOperation(_ operation: String) {
-        if let lastChar = display.last, "+-*/÷".contains(lastChar) {
+        if let lastChar = display.last, "+-x÷".contains(lastChar) {
             display.removeLast()
             display += "\(operation)"
         } else {
@@ -125,12 +137,13 @@ struct ContentView: View {
     
     private func calculateResult() {
         // Check if the last character is an operator
-        if let lastChar = display.last, "+-*/÷".contains(lastChar) {
+        if let lastChar = display.last, "+-x÷".contains(lastChar) {
             display = "Error"
             return
         }
         
         var formattedDisplay = display.replacingOccurrences(of: "÷", with: "/")
+        formattedDisplay = formattedDisplay.replacingOccurrences(of: "x", with: "*")
         formattedDisplay = formattedDisplay.replacingOccurrences(of: ",", with: "")
         let expressionString = formattedDisplay.replacingOccurrences(of: " ", with: "")
         
@@ -166,7 +179,7 @@ struct ContentView: View {
     }
     
     private func calculatePercentage() {
-        var components = display.split(separator: " ").map { String($0) }
+        var components = display.replacingOccurrences(of: ",", with: "").split(separator: " ").map { String($0) }
         
         // Check if the last component is a number
         if let lastComponent = components.last, let value = Double(lastComponent) {
@@ -218,7 +231,7 @@ struct ContentView: View {
     }
     
     private func toggleSign() {
-        var components = display.split(separator: " ").map { String($0) }
+        var components = display.replacingOccurrences(of: ",", with: "").split(separator: " ").map { String($0) }
         if var lastComponent = components.last, let value = Double(lastComponent) {
             lastComponent = String(-value)
             components[components.count - 1] = lastComponent
@@ -244,6 +257,7 @@ struct CalculatorButton: View {
     let label: String
     let action: () -> Void
     var backgroundColor: Color = .blue
+    var fontSize: Font = .largeTitle
     
     var body: some View {
         Button(action: action) {
@@ -252,6 +266,7 @@ struct CalculatorButton: View {
                 .background(backgroundColor)
                 .foregroundColor(.white)
                 .cornerRadius(40)
+                .font(fontSize)
         }
     }
 }
