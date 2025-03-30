@@ -138,24 +138,31 @@ struct ContentView: View {
     }
     
     private func calculateResult() {
-        // Check if the last character is an operator
-        if let lastChar = display.last, "+-x÷".contains(lastChar) {
-            return
-        }
-        
+       
         var formattedDisplay = display.replacingOccurrences(of: "÷", with: "/")
         formattedDisplay = formattedDisplay.replacingOccurrences(of: "x", with: "*")
         formattedDisplay = formattedDisplay.replacingOccurrences(of: ",", with: "")
+        // BJL - fixes issue where it was computing 9/5=1 instead of 1.8
+        formattedDisplay = "1.0*" + formattedDisplay
         let expressionString = formattedDisplay.replacingOccurrences(of: " ", with: "")
-        
-        // Check for division by zero
-        if expressionString.contains("/0") {
-            display = "Error"
+        // Check if the last character is an operator
+        if let lastChar = expressionString.last, "+-*/".contains(lastChar) {
             return
-        }
+        }   
+        
+        //BJL tmp
+        print(expressionString)
+        
+        // Check for division by zero (BJL - it fails a /0.2)
+        // if expressionString.contains("/0") {
+        // display = "Error"
+        //    return
+        // }
         
         let expression = NSExpression(format: expressionString)
+        print(expression)
         if let result = expression.expressionValue(with: nil, context: nil) as? Double {
+            print(result)
             let numberFormatter = NumberFormatter()
             numberFormatter.numberStyle = .decimal
             numberFormatter.maximumFractionDigits = 10
